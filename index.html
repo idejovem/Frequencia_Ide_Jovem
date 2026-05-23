@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>iDE Jovem</title>
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#062b26" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins', sans-serif;
+    }
+
+    body{
+      background:#041917;
+      color:white;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .background{
+      position:fixed;
+      width:100%;
+      height:100%;
+      z-index:-1;
+      background:
+      radial-gradient(circle at top, rgba(255,136,0,.15), transparent 25%),
+      linear-gradient(to bottom,#08342d,#041917);
+    }
+
+    .container{
+      width:100%;
+      max-width:430px;
+      margin:auto;
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .screen{
+      display:none;
+      animation:fade .3s ease;
+    }
+
+    .active{
+      display:block;
+    }
+
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(10px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .logo{
+      width:230px;
+      display:block;
+      margin:30px auto 20px;
+      border-radius:24px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .card{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter:blur(10px);
+      border-radius:24px;
+      padding:22px;
+      margin-bottom:20px;
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+    }
+
+    .title{
+      text-align:center;
+      font-size:24px;
+      font-weight:700;
+      margin-bottom:20px;
+    }
+
+    .subtitle{
+      text-align:center;
+      opacity:.8;
+      margin-bottom:20px;
+      font-size:14px;
+    }
+
+    input{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:15px;
+      margin-top:12px;
+      background:#ffffff12;
+      color:white;
+      outline:none;
+      font-size:15px;
+    }
+
+    input::placeholder{
+      color:#d9d9d9;
+    }
+
+    button{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:16px;
+      margin-top:15px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    button:active{
+      transform:scale(.98);
+    }
+
+    .btn-main{
+      background:linear-gradient(135deg,#ff6600,#ff9d00);
+      color:white;
+      box-shadow:0 10px 20px rgba(255,102,0,.3);
+    }
+
+    .menu-btn{
+      background:#ffffff10;
+      color:white;
+      text-align:left;
+      padding-left:20px;
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:14px;
+    }
+
+    .menu-btn span{
+      font-size:22px;
+      margin-right:10px;
+    }
+
+    .young-item,
+    .check-item,
+    .report-item{
+      background:#ffffff10;
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:12px;
+    }
+
+    .young-name{
+      font-weight:600;
+      font-size:16px;
+    }
+
+    .small{
+      font-size:13px;
+      opacity:.75;
+      margin-top:5px;
+    }
+
+    .check-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .check-item input{
+      width:22px;
+      height:22px;
+    }
+
+    .bar{
+      width:100%;
+      height:18px;
+      border-radius:50px;
+      background:#ffffff12;
+      overflow:hidden;
+      margin-top:10px;
+    }
+
+    .fill{
+      height:100%;
+      border-radius:50px;
+      background:linear-gradient(to right,#ff6600,#ffb300);
+    }
+
+    .top-date{
+      text-align:center;
+      margin-bottom:20px;
+      opacity:.8;
+      font-size:14px;
+    }
+
+    .center{
+      text-align:center;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="background"></div>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <section id="loginScreen" class="screen active">
+
+    <img
+      src="https://i.postimg.cc/3JVcrDZf/file-000000009b9c720e988c2dd8861bba4b.jpg"
+      class="logo"
+    >
+
+    <div class="card">
+
+      <div class="title">
+        iDE Jovem
+      </div>
+
+      <div class="subtitle">
+        Painel Administrativo
+      </div>
+
+      <input type="email" id="email" placeholder="Email administrador">
+
+      <input type="password" id="senha" placeholder="Senha">
+
+      <button class="btn-main" onclick="login()">
+        Entrar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- MENU -->
+  <section id="menuScreen" class="screen">
+
+    <img
+      src="https://i.postimg.cc/3JVcrDZf/file-000000009b9c720e988c2dd8861bba4b.jpg"
+      class="logo"
+    >
+
+    <div class="card">
+
+      <button class="menu-btn" onclick="openScreen('cadastroScreen')">
+        <span>📝</span> Cadastro
+      </button>
+
+      <button class="menu-btn" onclick="loadYoungs(); openScreen('jovensScreen')">
+        <span>👥</span> Jovens
+      </button>
+
+      <button class="menu-btn" onclick="loadReports(); openScreen('relatorioScreen')">
+        <span>📊</span> Relatório
+      </button>
+
+      <button class="menu-btn" onclick="loadAttendance(); openScreen('chamadaScreen')">
+        <span>✅</span> Chamada
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- CADASTRO -->
+  <section id="cadastroScreen" class="screen">
+
+    <div class="card">
+
+      <div class="title">
+        Cadastro Jovem
+      </div>
+
+      <input type="text" id="nome" placeholder="Nome completo">
+
+      <input type="date" id="nascimento">
+
+      <input type="text" id="whatsapp" placeholder="WhatsApp">
+
+      <button class="btn-main" onclick="saveYoung()">
+        Salvar Jovem
+      </button>
+
+      <button onclick="openScreen('menuScreen')">
+        Voltar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- JOVENS -->
+  <section id="jovensScreen" class="screen">
+
+    <div class="card">
+
+      <div class="title">
+        Jovens Cadastrados
+      </div>
+
+      <div id="youngList"></div>
+
+      <button onclick="openScreen('menuScreen')">
+        Voltar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- RELATÓRIO -->
+  <section id="relatorioScreen" class="screen">
+
+    <div class="card">
+
+      <div class="title">
+        Relatório Frequência
+      </div>
+
+      <div id="reportList"></div>
+
+      <button onclick="openScreen('menuScreen')">
+        Voltar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- CHAMADA -->
+  <section id="chamadaScreen" class="screen">
+
+    <div class="card">
+
+      <div class="title">
+        Chamada
+      </div>
+
+      <div class="top-date" id="eventDate"></div>
+
+      <div id="attendanceList"></div>
+
+      <button class="btn-main" onclick="confirmAttendance()">
+        Confirmar Chamada
+      </button>
+
+      <button onclick="openScreen('menuScreen')">
+        Voltar
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+
+  // =============================
+  // SUPABASE
+  // =============================
+
+  const SUPABASE_URL = 'https://vskzcqlqxwzqxedxqrti.supabase.co';
+
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZza3pjcWxxeHd6cXhlZHhxcnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NTA5MTMsImV4cCI6MjA5NTEyNjkxM30.JN_P2RVGhiav5bAWEql7gltL4W4t39x9D3ZVGsiUsOI';
+
+  const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+  // =============================
+  // LOGIN
+  // =============================
+
+  async function login(){
+
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+
+    if(!email || !senha){
+      alert('Preencha email e senha');
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password: senha
+    });
+
+    if(error){
+      alert('Login inválido');
+      return;
+    }
+
+    openScreen('menuScreen');
+  }
+
+
+  // =============================
+  // TROCAR TELA
+  // =============================
+
+  function openScreen(screenId){
+
+    document.querySelectorAll('.screen').forEach(screen=>{
+      screen.classList.remove('active');
+    });
+
+    document.getElementById(screenId).classList.add('active');
+  }
+
+
+  // =============================
+  // CADASTRAR JOVEM
+  // =============================
+
+  async function saveYoung(){
+
+    const nome = document.getElementById('nome').value;
+    const nascimento = document.getElementById('nascimento').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+
+    if(!nome || !nascimento || !whatsapp){
+      alert('Preencha todos os campos');
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('jovens')
+      .insert([
+        {
+          nome,
+          nascimento,
+          whatsapp
+        }
+      ]);
+
+    if(error){
+      alert('Erro ao cadastrar');
+      console.log(error);
+      return;
+    }
+
+    alert('Jovem cadastrado com sucesso');
+
+    document.getElementById('nome').value='';
+    document.getElementById('nascimento').value='';
+    document.getElementById('whatsapp').value='';
+
+    openScreen('menuScreen');
+  }
+
+
+  // =============================
+  // LISTAR JOVENS
+  // =============================
+
+  async function loadYoungs(){
+
+    const { data, error } = await supabaseClient
+      .from('jovens')
+      .select('*')
+      .order('nome');
+
+    const list = document.getElementById('youngList');
+
+    list.innerHTML='';
+
+    if(error){
+      list.innerHTML='Erro ao carregar';
+      return;
+    }
+
+    if(data.length === 0){
+      list.innerHTML='<p>Nenhum jovem cadastrado.</p>';
+      return;
+    }
+
+    data.forEach(jovem=>{
+
+      list.innerHTML += `
+        <div class="young-item">
+
+          <div class="young-name">
+            ${jovem.nome}
+          </div>
+
+          <div class="small">
+            ${jovem.whatsapp}
+          </div>
+
+        </div>
+      `;
+
+    });
+  }
+
+
+  // =============================
+  // TIPO EVENTO
+  // =============================
+
+  function getEventType(){
+
+    const now = new Date();
+
+    const day = now.getDay();
+
+    const date = now.getDate();
+
+    const week = Math.ceil(date / 7);
+
+    if(day === 3) return 'Quarta-feira';
+
+    if(day === 5) return 'Sexta-feira';
+
+    if(day === 0) return 'Domingo';
+
+    if(day === 6 && week === 2) return 'Segundo Sábado';
+
+    if(day === 6 && week === 4) return 'Quarto Sábado';
+
+    return 'Evento Especial';
+  }
+
+
+  // =============================
+  // CHAMADA
+  // =============================
+
+  async function loadAttendance(){
+
+    const { data, error } = await supabaseClient
+      .from('jovens')
+      .select('*')
+      .order('nome');
+
+    const list = document.getElementById('attendanceList');
+
+    list.innerHTML='';
+
+    const event = getEventType();
+
+    document.getElementById('eventDate').innerHTML =
+      `${event} • ${new Date().toLocaleDateString('pt-BR')}`;
+
+    if(error){
+      list.innerHTML='Erro ao carregar';
+      return;
+    }
+
+    data.forEach(jovem=>{
+
+      list.innerHTML += `
+
+        <div class="check-item">
+
+          <span>${jovem.nome}</span>
+
+          <input
+            type="checkbox"
+            class="check-presence"
+            value="${jovem.id}"
+          >
+
+        </div>
+
+      `;
+
+    });
+  }
+
+
+  // =============================
+  // CONFIRMAR CHAMADA
+  // =============================
+
+  async function confirmAttendance(){
+
+    const checks = document.querySelectorAll('.check-presence');
+
+    const event = getEventType();
+
+    for(const check of checks){
+
+      await supabaseClient
+        .from('frequencia')
+        .insert([
+          {
+            jovem_id: check.value,
+            presente: check.checked,
+            evento: event,
+            data_evento: new Date().toISOString()
+          }
+        ]);
+
+    }
+
+    alert('Chamada salva com sucesso');
+
+    openScreen('menuScreen');
+  }
+
+
+  // =============================
+  // RELATÓRIO
+  // =============================
+
+  async function loadReports(){
+
+    const reportList = document.getElementById('reportList');
+
+    reportList.innerHTML='Carregando...';
+
+    const { data: jovens } = await supabaseClient
+      .from('jovens')
+      .select('*');
+
+    const { data: frequencia } = await supabaseClient
+      .from('frequencia')
+      .select('*');
+
+    reportList.innerHTML='';
+
+    jovens.forEach(jovem=>{
+
+      const registros = frequencia.filter(
+        f => f.jovem_id == jovem.id
+      );
+
+      const total = registros.length;
+
+      const presentes = registros.filter(
+        f => f.presente
+      ).length;
+
+      const percent = total > 0
+        ? Math.round((presentes / total) * 100)
+        : 0;
+
+      reportList.innerHTML += `
+
+        <div class="report-item">
+
+          <strong>${jovem.nome}</strong>
+
+          <div class="bar">
+            <div class="fill" style="width:${percent}%"></div>
+          </div>
+
+          <div class="small">
+            ${percent}% de presença
+          </div>
+
+        </div>
+
+      `;
+
+    });
+  }
+
+
+  // =============================
+  // SERVICE WORKER
+  // =============================
+
+  if('serviceWorker' in navigator){
+
+    navigator.serviceWorker.register('sw.js');
+  }
+
+</script>
+
+</body>
+</html>
