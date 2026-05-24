@@ -689,11 +689,10 @@
 
   async function loadYoungs(){
 
-    const { data, error } =
-    await supabaseClient
-    .from('jovens')
-    .select('*')
-    .order('nome');
+    const { data: jovens } = await supabaseClient
+  .from('jovens')
+  .select('*')
+  .order('nome', { ascending: true });
 
     const list =
     document.getElementById('youngList');
