@@ -359,6 +359,13 @@
         <span>✅</span> Chamada
       </button>
 
+      <button
+  class="menu-btn"
+  onclick="loadBirthdays(); openScreen('aniversariosScreen')"
+>
+  <span>🎂</span> Aniversariantes
+</button>
+
     </div>
 
   </section>
@@ -475,6 +482,26 @@
     </div>
 
   </section>
+
+  <!-- ANIVERSARIANTES -->
+
+  <section id="aniversariosScreen" class="screen">
+
+  <div class="card">
+
+    <div class="title">
+      🎂 Aniversariantes do Mês
+    </div>
+
+    <div id="birthList"></div>
+
+    <button onclick="openScreen('menuScreen')">
+      Voltar
+    </button>
+
+  </div>
+
+</section>
 
 </div>
 
