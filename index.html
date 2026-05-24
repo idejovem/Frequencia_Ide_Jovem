@@ -834,15 +834,17 @@ async function loadAttendance(){
   let selectedDate =
   document.getElementById('attendanceDate')?.value;
 
-  // SE NÃO ESCOLHER, USA HOJE
-  if(!selectedDate){
+    const dateInput =
+  document.getElementById('attendanceDate');
 
-    selectedDate =
+  // DEFINE HOJE SOMENTE NA PRIMEIRA VEZ
+  if(!dateInput.value){
+
+    dateInput.value =
     new Date().toISOString().split('T')[0];
-
-    document.getElementById('attendanceDate').value =
-    selectedDate;
   }
+
+  selectedDate = dateInput.value;
 
   // BUSCAR PRESENÇAS DA DATA ESCOLHIDA
   const { data: presencasHoje } =
