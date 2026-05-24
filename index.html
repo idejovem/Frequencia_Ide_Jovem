@@ -442,6 +442,12 @@
       Relatório Frequência
     </div>
 
+    <input
+  type="month"
+  id="reportMonth"
+  onchange="loadReports()"
+/>
+
     <div id="reportList"></div>
 
     <div id="rankingList"></div>
@@ -469,6 +475,11 @@
         class="top-date"
         id="eventDate"
       ></div>
+
+      <input
+  type="date"
+  id="attendanceDate"
+/>
 
       <div id="attendanceList"></div>
 
@@ -806,74 +817,109 @@
   }
 
 
-  // =========================
-  // CHAMADA
-  // =========================
+ // =========================
+// CHAMADA
+// =========================
 
-  async function loadAttendance(){
+async function loadAttendance(){
 
-    const { data: jovens, error } =
-    await supabaseClient
-    .from('jovens')
-    .select('*')
-    .order('nome');
+  const { data: jovens, error } =
+  await supabaseClient
+  .from('jovens')
+  .select('*')
+  .order('nome');
 
-    const today =
+  // DATA ESCOLHIDA
+  let selectedDate =
+  document.getElementById('attendanceDate')?.value;
+
+  if(!selectedDate){
+
+    selectedDate =
     new Date().toISOString().split('T')[0];
-
-    const { data: presencasHoje } =
-    await supabaseClient
-    .from('frequencia')
-    .select('*')
-    .gte('data_evento', today + 'T00:00:00')
-    .lte('data_evento', today + 'T23:59:59');
-
-    const list =
-    document.getElementById('attendanceList');
-
-    list.innerHTML='';
-
-    const event = getEventType();
-
-    document.getElementById('eventDate')
-    .innerHTML =
-    `${event} • ${new Date().toLocaleDateString('pt-BR')}`;
-
-    if(error){
-
-      list.innerHTML='Erro ao carregar';
-      return;
-    }
-
-    jovens.forEach(jovem=>{
-
-      const jaMarcado =
-      presencasHoje.some(
-        p => p.jovem_id == jovem.id && p.presente
-      );
-
-      list.innerHTML += `
-
-        <div class="check-item ${jaMarcado ? 'disabled-check' : ''}">
-
-          <span>
-            ${jovem.nome}
-            ${jaMarcado ? '✅' : ''}
-          </span>
-
-          <input
-            type="checkbox"
-            class="check-presence"
-            value="${jovem.id}"
-            ${jaMarcado ? 'checked disabled' : ''}
-          >
-
-        </div>
-
-      `;
-    });
   }
 
+ const monthInput =
+document.getElementById('reportMonth');
+
+const current =
+new Date();
+
+if(!monthInput.value){
+
+  monthInput.value =
+  `${current.getFullYear()}-${
+    String(current.getMonth()+1)
+    .padStart(2,'0')
+  }`;
+}
+
+const selectedMonth =
+monthInput.value;
+
+const startDate =
+selectedMonth + '-01T00:00:00';
+
+const endDate =
+selectedMonth + '-31T23:59:59';
+
+const { data: frequencia } =
+await supabaseClient
+.from('frequencia')
+.select('*')
+.gte('data_evento', startDate)
+.lte('data_evento', endDate);
+  .gte('data_evento', selectedDate + 'T00:00:00')
+  .lte('data_evento', selectedDate + 'T23:59:59');
+
+  const list =
+  document.getElementById('attendanceList');
+
+  list.innerHTML='';
+
+  const event = getEventType();
+
+  document.getElementById('eventDate')
+  .innerHTML =
+  `${event} • ${
+    new Date(selectedDate)
+    .toLocaleDateString('pt-BR')
+  }`;
+
+  if(error){
+
+    list.innerHTML='Erro ao carregar';
+    return;
+  }
+
+  jovens.forEach(jovem=>{
+
+    const jaMarcado =
+    presencasHoje.some(
+      p => p.jovem_id == jovem.id && p.presente
+    );
+
+    list.innerHTML += `
+
+      <div class="check-item ${jaMarcado ? 'disabled-check' : ''}">
+
+        <span>
+          ${jovem.nome}
+          ${jaMarcado ? '✅' : ''}
+        </span>
+
+        <input
+          type="checkbox"
+          class="check-presence"
+          value="${jovem.id}"
+          ${jaMarcado ? 'checked disabled' : ''}
+        >
+
+      </div>
+
+    `;
+  });
+}
 
   // =========================
   // CONFIRMAR CHAMADA
@@ -887,7 +933,8 @@
     const event = getEventType();
 
     const today =
-    new Date().toISOString().split('T')[0];
+document.getElementById('attendanceDate').value
+|| new Date().toISOString().split('T')[0];
 
     let total = 0;
 
