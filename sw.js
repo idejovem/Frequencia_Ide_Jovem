@@ -1,33 +1,34 @@
-const CACHE_NAME = "ide-jovem-v1";
+const CACHE_NAME = 'ide-jovem-v1';
 
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
-self.addEventListener("install", event => {
+self.addEventListener('install', event => {
 
   event.waitUntil(
 
     caches.open(CACHE_NAME)
-      .then(cache => {
+    .then(cache => {
 
-        return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache);
 
-      })
+    })
   );
 });
 
-self.addEventListener("fetch", event => {
+
+self.addEventListener('fetch', event => {
 
   event.respondWith(
 
     caches.match(event.request)
-      .then(response => {
+    .then(response => {
 
-        return response || fetch(event.request);
+      return response || fetch(event.request);
 
-      })
+    })
   );
 });
