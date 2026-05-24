@@ -899,215 +899,55 @@
   }
 
 
-   // =========================
-  // RELATÓRIO
-  // =========================
+// =========================
+// RELATÓRIO
+// =========================
+async function loadReports(){
 
-  async function loadReports(){
+  const reportList = document.getElementById('reportList');
+  reportList.innerHTML = 'Carregando...';
 
-    const reportList =
-    document.getElementById('reportList');
-
-    const rankingList =
-    document.getElementById('rankingList');
-
-    const perfectList =
-    document.getElementById('perfectList');
-
-    reportList.innerHTML='Carregando...';
-
-    const { data: jovens } =
-    await supabaseClient
+  const { data: jovens } = await supabaseClient
     .from('jovens')
-    .select('*')
-    .order('nome');
+    .select('*');
 
-    const { data: frequencia } =
-    await supabaseClient
+  const { data: frequencia } = await supabaseClient
     .from('frequencia')
     .select('*');
 
-    reportList.innerHTML='';
-    rankingList.innerHTML='';
-    perfectList.innerHTML='';
+  reportList.innerHTML = '';
 
-    let ranking = [];
+  // ORDENAR ALFABÉTICO
+  jovens.sort((a, b) => a.nome.localeCompare(b.nome));
 
-    // =====================
-    // LISTA INDIVIDUAL
-    // =====================
+  jovens.forEach(jovem => {
 
-    jovens.forEach(jovem=>{
+    const registros = frequencia.filter(
+      f => f.jovem_id == jovem.id
+    );
 
-      const registros =
-      frequencia.filter(
-        f => f.jovem_id == jovem.id
-      );
+    const total = registros.length;
+    const presentes = registros.filter(f => f.presente).length;
 
-      const total = registros.length;
-
-      const presentes =
-      registros.filter(
-        f => f.presente
-      ).length;
-
-      const faltas =
-      total - presentes;
-
-      const percent =
-      total > 0
+    const percent = total > 0
       ? Math.round((presentes / total) * 100)
       : 0;
 
-      ranking.push({
-        nome: jovem.nome,
-        percent,
-        presentes,
-        faltas,
-        total
-      });
-
-      reportList.innerHTML += `
-
-        <div class="report-item">
-
-          <strong>${jovem.nome}</strong>
-
-          <div class="bar">
-
-            <div
-              class="fill"
-              style="width:${percent}%"
-            ></div>
-
-          </div>
-
-          <div class="small">
-            📈 ${percent}% de presença
-          </div>
-
-          <div class="small">
-            ✅ ${presentes} presença(s)
-          </div>
-
-          <div class="small">
-            ❌ ${faltas} falta(s)
-          </div>
-
-        </div>
-
-      `;
-    });
-
-    // =====================
-    // RANKING PRESENÇA
-    // =====================
-
-    const rankingPresenca =
-    [...ranking]
-    .sort((a,b)=>
-      b.presentes - a.presentes
-    );
-
-    rankingList.innerHTML = `
-
-      <div class="report-item">
-
-        <strong>
-          🏆 Quem Mais Compareceu
-        </strong>
-
-        <br><br>
-
-        ${rankingPresenca.map((r,index)=>`
-
-          <div class="small">
-
-            ${index + 1}º —
-            ${r.nome}
-
-            • ${r.presentes} presença(s)
-
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-
-    // =====================
-    // PRESENÇA PERFEITA
-    // =====================
-
-    const perfeitos =
-    ranking.filter(
-      r => r.percent === 100 && r.total > 0
-    );
-
-    if(perfeitos.length > 0){
-
-      perfectList.innerHTML = `
-
-        <div class="report-item">
-
-          <strong>
-            🔥 Presença em Todos os Cultos
-          </strong>
-
-          <br><br>
-
-          ${perfeitos.map(p=>`
-
-            <div class="small">
-              ${p.nome}
-            </div>
-
-          `).join('')}
-
-        </div>
-
-      `;
-    }
-
-    // =====================
-    // MAIS FALTAS
-    // =====================
-
-    const faltosos =
-    [...ranking]
-    .sort((a,b)=>
-      b.faltas - a.faltas
-    );
-
     reportList.innerHTML += `
-
       <div class="report-item">
+        <strong>${jovem.nome}</strong>
 
-        <strong>
-          ⚠️ Quem Mais Faltou
-        </strong>
+        <div class="bar">
+          <div class="fill" style="width:${percent}%"></div>
+        </div>
 
-        <br><br>
-
-        ${faltosos.map((f,index)=>`
-
-          <div class="small">
-
-            ${index + 1}º —
-            ${f.nome}
-
-            • ${f.faltas} falta(s)
-
-          </div>
-
-        `).join('')}
-
+        <div class="small">
+          ${percent}% de presença
+        </div>
       </div>
-
     `;
-  }
-
+  });
+}
  </script>
 
 <script>
