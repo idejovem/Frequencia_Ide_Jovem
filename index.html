@@ -433,24 +433,28 @@
 
   </section>
 
-  <!-- RELATÓRIO -->
-  <section id="relatorioScreen" class="screen">
+<!-- RELATÓRIO -->
+<section id="relatorioScreen" class="screen">
 
-    <div class="card">
+  <div class="card">
 
-      <div class="title">
-        Relatório Frequência
-      </div>
-
-      <div id="reportList"></div>
-
-      <button onclick="openScreen('menuScreen')">
-        Voltar
-      </button>
-
+    <div class="title">
+      Relatório Frequência
     </div>
 
-  </section>
+    <div id="reportList"></div>
+
+    <div id="rankingList"></div>
+
+    <div id="perfectList"></div>
+
+    <button onclick="openScreen('menuScreen')">
+      Voltar
+    </button>
+
+  </div>
+
+</section>
 
   <!-- CHAMADA -->
   <section id="chamadaScreen" class="screen">
@@ -710,16 +714,21 @@
   }
 
 
+<script>
+
   // =========================
   // LISTAR JOVENS
   // =========================
 
   async function loadYoungs(){
 
-    const { data: jovens } = await supabaseClient
-  .from('jovens')
-  .select('*')
-  .order('nome', { ascending: true });
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from('jovens')
+      .select('*')
+      .order('nome', { ascending: true });
 
     const list =
     document.getElementById('youngList');
