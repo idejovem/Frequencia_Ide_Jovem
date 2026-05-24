@@ -479,6 +479,7 @@
       <input
   type="date"
   id="attendanceDate"
+ onchange="loadAttendance()"
 />
 
       <div id="attendanceList"></div>
@@ -817,7 +818,7 @@
   }
 
 
- // =========================
+// =========================
 // CHAMADA
 // =========================
 
@@ -833,42 +834,21 @@ async function loadAttendance(){
   let selectedDate =
   document.getElementById('attendanceDate')?.value;
 
+  // SE NÃO ESCOLHER, USA HOJE
   if(!selectedDate){
 
     selectedDate =
     new Date().toISOString().split('T')[0];
+
+    document.getElementById('attendanceDate').value =
+    selectedDate;
   }
 
- const monthInput =
-document.getElementById('reportMonth');
-
-const current =
-new Date();
-
-if(!monthInput.value){
-
-  monthInput.value =
-  `${current.getFullYear()}-${
-    String(current.getMonth()+1)
-    .padStart(2,'0')
-  }`;
-}
-
-const selectedMonth =
-monthInput.value;
-
-const startDate =
-selectedMonth + '-01T00:00:00';
-
-const endDate =
-selectedMonth + '-31T23:59:59';
-
-const { data: frequencia } =
-await supabaseClient
-.from('frequencia')
-.select('*')
-.gte('data_evento', startDate)
-.lte('data_evento', endDate);
+  // BUSCAR PRESENÇAS DA DATA ESCOLHIDA
+  const { data: presencasHoje } =
+  await supabaseClient
+  .from('frequencia')
+  .select('*')
   .gte('data_evento', selectedDate + 'T00:00:00')
   .lte('data_evento', selectedDate + 'T23:59:59');
 
@@ -920,264 +900,245 @@ await supabaseClient
     `;
   });
 }
+  
+ // =========================
+// CONFIRMAR CHAMADA
+// =========================
 
-  // =========================
-  // CONFIRMAR CHAMADA
-  // =========================
+async function confirmAttendance(){
 
-  async function confirmAttendance(){
+  const checks =
+  document.querySelectorAll('.check-presence');
 
-    const checks =
-    document.querySelectorAll('.check-presence');
+  const event = getEventType();
 
-    const event = getEventType();
+  // DATA ESCOLHIDA
+  const selectedDate =
+  document.getElementById('attendanceDate').value
+  || new Date().toISOString().split('T')[0];
 
-    const today =
-document.getElementById('attendanceDate').value
-|| new Date().toISOString().split('T')[0];
+  let total = 0;
 
-    let total = 0;
+  for(const check of checks){
 
-    for(const check of checks){
+    if(check.checked && !check.disabled){
 
-      if(check.checked && !check.disabled){
+      const { data: existente } =
+      await supabaseClient
+      .from('frequencia')
+      .select('*')
+      .eq('jovem_id', check.value)
+      .gte('data_evento', selectedDate + 'T00:00:00')
+      .lte('data_evento', selectedDate + 'T23:59:59');
 
-        const { data: existente } =
+      if(existente.length === 0){
+
         await supabaseClient
         .from('frequencia')
-        .select('*')
-        .eq('jovem_id', check.value)
-        .gte('data_evento', today + 'T00:00:00')
-        .lte('data_evento', today + 'T23:59:59');
+        .insert([
+          {
+            jovem_id: check.value,
+            presente: true,
+            evento: event,
+            data_evento: selectedDate + 'T12:00:00'
+          }
+        ]);
 
-        if(existente.length === 0){
-
-          await supabaseClient
-          .from('frequencia')
-          .insert([
-            {
-              jovem_id: check.value,
-              presente: true,
-              evento: event,
-              data_evento: new Date().toISOString()
-            }
-          ]);
-
-          total++;
-        }
+        total++;
       }
     }
-
-    alert(
-      total > 0
-      ? `${total} presença(s) salva(s)`
-      : 'Nenhuma nova presença'
-    );
-
-    loadAttendance();
   }
 
+  alert(
+    total > 0
+    ? `${total} presença(s) salva(s)`
+    : 'Nenhuma nova presença'
+  );
 
-  // =========================
-  // RELATÓRIO
-  // =========================
+  loadAttendance();
+}
+  
+ // =========================
+// RELATÓRIO
+// =========================
 
-  async function loadReports(){
+async function loadReports(){
 
-    const reportList =
-    document.getElementById('reportList');
+  const reportList =
+  document.getElementById('reportList');
 
-    const rankingList =
-    document.getElementById('rankingList');
+  const rankingList =
+  document.getElementById('rankingList');
 
-    const perfectList =
-    document.getElementById('perfectList');
+  const perfectList =
+  document.getElementById('perfectList');
 
-    reportList.innerHTML='Carregando...';
+  reportList.innerHTML='Carregando...';
 
-    const { data: jovens } =
-    await supabaseClient
-    .from('jovens')
-    .select('*')
-    .order('nome');
+  // INPUT MÊS
+  const monthInput =
+  document.getElementById('reportMonth');
 
-    const { data: frequencia } =
-    await supabaseClient
-    .from('frequencia')
-    .select('*');
+  // DEFINE MÊS ATUAL AUTOMÁTICO
+  const current =
+  new Date();
 
-    reportList.innerHTML='';
-    rankingList.innerHTML='';
-    perfectList.innerHTML='';
+  if(!monthInput.value){
 
-    let ranking = [];
+    monthInput.value =
+    `${current.getFullYear()}-${
+      String(current.getMonth()+1)
+      .padStart(2,'0')
+    }`;
+  }
 
-    // =====================
-    // LISTA INDIVIDUAL
-    // =====================
+  const selectedMonth =
+  monthInput.value;
 
-    jovens.forEach(jovem=>{
+  const startDate =
+  selectedMonth + '-01T00:00:00';
 
-      const registros =
-      frequencia.filter(
-        f => f.jovem_id == jovem.id
-      );
+  const endDate =
+  selectedMonth + '-31T23:59:59';
 
-      const total = registros.length;
+  const { data: jovens } =
+  await supabaseClient
+  .from('jovens')
+  .select('*')
+  .order('nome');
 
-      const presentes =
-      registros.filter(
-        f => f.presente
-      ).length;
+  // FILTRA SOMENTE O MÊS ESCOLHIDO
+  const { data: frequencia } =
+  await supabaseClient
+  .from('frequencia')
+  .select('*')
+  .gte('data_evento', startDate)
+  .lte('data_evento', endDate);
 
-      const faltas =
-      total - presentes;
+  reportList.innerHTML='';
+  rankingList.innerHTML='';
+  perfectList.innerHTML='';
 
-      const percent =
-      total > 0
-      ? Math.round((presentes / total) * 100)
-      : 0;
+  let ranking = [];
 
-      ranking.push({
-        nome: jovem.nome,
-        percent,
-        presentes,
-        faltas,
-        total
-      });
+  jovens.forEach(jovem=>{
 
-      reportList.innerHTML += `
+    const registros =
+    frequencia.filter(
+      f => f.jovem_id == jovem.id
+    );
 
-        <div class="report-item">
+    const total = registros.length;
 
-          <strong>${jovem.nome}</strong>
+    const presentes =
+    registros.filter(
+      f => f.presente
+    ).length;
 
-          <div class="bar">
+    const faltas =
+    total - presentes;
 
-            <div
-              class="fill"
-              style="width:${percent}%"
-            ></div>
+    const percent =
+    total > 0
+    ? Math.round((presentes / total) * 100)
+    : 0;
 
-          </div>
-
-          <div class="small">
-            📈 ${percent}% de presença
-          </div>
-
-          <div class="small">
-            ✅ ${presentes} presença(s)
-          </div>
-
-          <div class="small">
-            ❌ ${faltas} falta(s)
-          </div>
-
-        </div>
-
-      `;
+    ranking.push({
+      nome: jovem.nome,
+      percent,
+      presentes,
+      faltas,
+      total
     });
-
-    // =====================
-    // RANKING PRESENÇA
-    // =====================
-
-    const rankingPresenca =
-    [...ranking]
-    .sort((a,b)=>
-      b.presentes - a.presentes
-    );
-
-    rankingList.innerHTML = `
-
-      <div class="report-item">
-
-        <strong>
-          🏆 Quem Mais Compareceu
-        </strong>
-
-        <br><br>
-
-        ${rankingPresenca.map((r,index)=>`
-
-          <div class="small">
-
-            ${index + 1}º —
-            ${r.nome}
-
-            • ${r.presentes} presença(s)
-
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-
-    // =====================
-    // PRESENÇA PERFEITA
-    // =====================
-
-    const perfeitos =
-    ranking.filter(
-      r => r.percent === 100 && r.total > 0
-    );
-
-    if(perfeitos.length > 0){
-
-      perfectList.innerHTML = `
-
-        <div class="report-item">
-
-          <strong>
-            🔥 Presença em Todos os Cultos
-          </strong>
-
-          <br><br>
-
-          ${perfeitos.map(p=>`
-
-            <div class="small">
-              ${p.nome}
-            </div>
-
-          `).join('')}
-
-        </div>
-
-      `;
-    }
-
-    // =====================
-    // MAIS FALTAS
-    // =====================
-
-    const faltosos =
-    [...ranking]
-    .sort((a,b)=>
-      b.faltas - a.faltas
-    );
 
     reportList.innerHTML += `
 
       <div class="report-item">
 
+        <strong>${jovem.nome}</strong>
+
+        <div class="bar">
+
+          <div
+            class="fill"
+            style="width:${percent}%"
+          ></div>
+
+        </div>
+
+        <div class="small">
+          📈 ${percent}% de presença
+        </div>
+
+        <div class="small">
+          ✅ ${presentes} presença(s)
+        </div>
+
+        <div class="small">
+          ❌ ${faltas} falta(s)
+        </div>
+
+      </div>
+
+    `;
+  });
+
+  // RANKING
+  const rankingPresenca =
+  [...ranking]
+  .sort((a,b)=>
+    b.presentes - a.presentes
+  );
+
+  rankingList.innerHTML = `
+
+    <div class="report-item">
+
+      <strong>
+        🏆 Quem Mais Compareceu
+      </strong>
+
+      <br><br>
+
+      ${rankingPresenca.map((r,index)=>`
+
+        <div class="small">
+
+          ${index + 1}º —
+          ${r.nome}
+
+          • ${r.presentes} presença(s)
+
+        </div>
+
+      `).join('')}
+
+    </div>
+
+  `;
+
+  // PRESENÇA PERFEITA
+  const perfeitos =
+  ranking.filter(
+    r => r.percent === 100 && r.total > 0
+  );
+
+  if(perfeitos.length > 0){
+
+    perfectList.innerHTML = `
+
+      <div class="report-item">
+
         <strong>
-          ⚠️ Quem Mais Faltou
+          🔥 Presença em Todos os Cultos
         </strong>
 
         <br><br>
 
-        ${faltosos.map((f,index)=>`
+        ${perfeitos.map(p=>`
 
           <div class="small">
-
-            ${index + 1}º —
-            ${f.nome}
-
-            • ${f.faltas} falta(s)
-
+            ${p.nome}
           </div>
 
         `).join('')}
@@ -1186,6 +1147,42 @@ document.getElementById('attendanceDate').value
 
     `;
   }
+
+  // MAIS FALTAS
+  const faltosos =
+  [...ranking]
+  .sort((a,b)=>
+    b.faltas - a.faltas
+  );
+
+  reportList.innerHTML += `
+
+    <div class="report-item">
+
+      <strong>
+        ⚠️ Quem Mais Faltou
+      </strong>
+
+      <br><br>
+
+      ${faltosos.map((f,index)=>`
+
+        <div class="small">
+
+          ${index + 1}º —
+          ${f.nome}
+
+          • ${f.faltas} falta(s)
+
+        </div>
+
+      `).join('')}
+
+    </div>
+
+  `;
+}
+
 </script>
 
 <script>
