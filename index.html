@@ -1243,5 +1243,66 @@
 
 </script>
 
+<script>
+
+  // =========================
+  // ANIVERSARIANTES DO MÊS
+  // =========================
+
+  async function loadBirthdays(){
+
+    const { data, error } = await supabaseClient
+      .from('jovens')
+      .select('*')
+      .order('nome', { ascending: true });
+
+    const list = document.getElementById('birthList');
+
+    list.innerHTML = '';
+
+    if(error){
+      list.innerHTML = 'Erro ao carregar';
+      return;
+    }
+
+    const today = new Date();
+    const month = today.getMonth() + 1;
+
+    const aniversariantes = data.filter(jovem => {
+
+      if(!jovem.nascimento) return false;
+
+      const birthMonth = new Date(jovem.nascimento).getMonth() + 1;
+
+      return birthMonth === month;
+    });
+
+    if(aniversariantes.length === 0){
+      list.innerHTML = '<p>Nenhum aniversariante este mês.</p>';
+      return;
+    }
+
+    aniversariantes.forEach(jovem => {
+
+      const dia = new Date(jovem.nascimento).getDate();
+
+      list.innerHTML += `
+        <div class="young-item">
+
+          <div class="young-name">
+            🎉 ${jovem.nome}
+          </div>
+
+          <div class="small">
+            Dia ${dia} do mês
+          </div>
+
+        </div>
+      `;
+    });
+  }
+
+</script>
+
 </body>
 </html>
