@@ -1255,58 +1255,93 @@
   // ANIVERSARIANTES DO MÊS
   // =========================
 
-  async function loadBirthdays(){
 
-    const { data, error } = await supabaseClient
-      .from('jovens')
-      .select('*')
-      .order('nome', { ascending: true });
+async function loadBirthdays(){
 
-    const list = document.getElementById('birthList');
+  const { data, error } = await supabaseClient
+    .from('jovens')
+    .select('*')
+    .order('nome', { ascending: true });
 
-    list.innerHTML = '';
+  const list =
+  document.getElementById('birthList');
 
-    if(error){
-      list.innerHTML = 'Erro ao carregar';
-      return;
-    }
+  list.innerHTML = '';
 
-    const today = new Date();
-    const month = today.getMonth() + 1;
+  if(error){
 
-    const aniversariantes = data.filter(jovem => {
-
-      if(!jovem.nascimento) return false;
-
-      const birthMonth = new Date(jovem.nascimento).getMonth() + 1;
-
-      return birthMonth === month;
-    });
-
-    if(aniversariantes.length === 0){
-      list.innerHTML = '<p>Nenhum aniversariante este mês.</p>';
-      return;
-    }
-
-    aniversariantes.forEach(jovem => {
-
-      const dia = new Date(jovem.nascimento).getDate();
-
-      list.innerHTML += `
-        <div class="young-item">
-
-          <div class="young-name">
-            🎉 ${jovem.nome}
-          </div>
-
-          <div class="small">
-            Dia ${dia} do mês
-          </div>
-
-        </div>
-      `;
-    });
+    list.innerHTML = 'Erro ao carregar';
+    return;
   }
+
+  // MÊS ATUAL
+  const currentMonth =
+  new Date().getMonth() + 1;
+
+  // FILTRAR SOMENTE MÊS ATUAL
+  const aniversariantes =
+  data.filter(jovem => {
+
+    if(!jovem.nascimento){
+      return false;
+    }
+
+    // yyyy-mm-dd
+    const partes =
+    jovem.nascimento.split('-');
+
+    const mes =
+    parseInt(partes[1]);
+
+    return mes === currentMonth;
+
+  });
+
+  // ORDENAR PELO DIA
+  aniversariantes.sort((a,b)=>{
+
+    const diaA =
+    parseInt(a.nascimento.split('-')[2]);
+
+    const diaB =
+    parseInt(b.nascimento.split('-')[2]);
+
+    return diaA - diaB;
+
+  });
+
+  if(aniversariantes.length === 0){
+
+    list.innerHTML =
+    '<p>Nenhum aniversariante este mês.</p>';
+
+    return;
+  }
+
+  aniversariantes.forEach(jovem => {
+
+    const partes =
+    jovem.nascimento.split('-');
+
+    const dia = partes[2];
+
+    list.innerHTML += `
+
+      <div class="young-item">
+
+        <div class="young-name">
+          🎉 ${jovem.nome}
+        </div>
+
+        <div class="small">
+          Aniversário: ${dia}
+        </div>
+
+      </div>
+
+    `;
+  });
+}
 
 </script>
 
