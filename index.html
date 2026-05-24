@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+  
 <head>
-<head>
-
 <meta name="theme-color" content="#062b26" />
 
 <link rel="manifest" href="./manifest.json" />
@@ -968,11 +967,7 @@
   }
 
 
-  // =========================
-  // SERVICE WORKER
-  // =========================
-
-<!-- COLE ESSE TRECHO NO FINAL DO BODY, ANTES DE </body> -->
+ </script>
 
 <script>
 
@@ -1027,7 +1022,6 @@
 
   function showInstallButton(){
 
-    // evita duplicar botão
     if(document.getElementById('installAppBtn')){
       return;
     }
@@ -1050,20 +1044,13 @@
 
       deferredPrompt.prompt();
 
-      const { outcome } =
       await deferredPrompt.userChoice;
-
-      console.log(
-        'Resultado instalação:',
-        outcome
-      );
 
       deferredPrompt = null;
 
       btn.remove();
     };
 
-    // adiciona no menu principal
     const menuCard =
     document.querySelector('#menuScreen .card');
 
@@ -1078,8 +1065,6 @@
   window.addEventListener(
     'appinstalled',
     () => {
-
-      console.log('PWA instalado');
 
       const btn =
       document.getElementById('installAppBtn');
