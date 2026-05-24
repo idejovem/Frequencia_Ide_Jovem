@@ -830,23 +830,20 @@ async function loadAttendance(){
   .select('*')
   .order('nome');
 
-  // DATA ESCOLHIDA
-  let selectedDate =
-  document.getElementById('attendanceDate')?.value;
-
-    const dateInput =
+  const dateInput =
   document.getElementById('attendanceDate');
 
-  // DEFINE HOJE SOMENTE NA PRIMEIRA VEZ
+  // DEFINE HOJE APENAS 1 VEZ
   if(!dateInput.value){
 
     dateInput.value =
     new Date().toISOString().split('T')[0];
   }
 
-  selectedDate = dateInput.value;
+  const selectedDate =
+  dateInput.value;
 
-  // BUSCAR PRESENÇAS DA DATA ESCOLHIDA
+  // BUSCAR PRESENÇAS DA DATA
   const { data: presencasHoje } =
   await supabaseClient
   .from('frequencia')
@@ -901,8 +898,7 @@ async function loadAttendance(){
 
     `;
   });
-}
-  
+}  
  // =========================
 // CONFIRMAR CHAMADA
 // =========================
