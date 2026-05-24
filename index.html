@@ -917,8 +917,21 @@ async function loadReports(){
 
   reportList.innerHTML = '';
 
-  // ORDENAR ALFABÉTICO
-  jovens.sort((a, b) => a.nome.localeCompare(b.nome));
+  if (!jovens || jovens.length === 0) return;
+
+  // ORDEM ALFABÉTICA FORTE (ignora acento e maiúsculas/minúsculas)
+  jovens.sort((a, b) =>
+    (a.nome || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .localeCompare(
+        (b.nome || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+      )
+  );
 
   jovens.forEach(jovem => {
 
@@ -947,8 +960,7 @@ async function loadReports(){
       </div>
     `;
   });
-}
- </script>
+} </script>
 
 <script>
 
