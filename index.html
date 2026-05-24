@@ -898,68 +898,215 @@
   }
 
 
-// =========================
-// RELATÓRIO
-// =========================
-async function loadReports(){
+  // =========================
+  // RELATÓRIO
+  // =========================
 
-  const reportList = document.getElementById('reportList');
-  reportList.innerHTML = 'Carregando...';
+  async function loadReports(){
 
-  const { data: jovens } = await supabaseClient
+    const reportList =
+    document.getElementById('reportList');
+
+    const rankingList =
+    document.getElementById('rankingList');
+
+    const perfectList =
+    document.getElementById('perfectList');
+
+    reportList.innerHTML='Carregando...';
+
+    const { data: jovens } =
+    await supabaseClient
     .from('jovens')
-    .select('*');
+    .select('*')
+    .order('nome');
 
-  const { data: frequencia } = await supabaseClient
+    const { data: frequencia } =
+    await supabaseClient
     .from('frequencia')
     .select('*');
 
-  reportList.innerHTML = '';
+    reportList.innerHTML='';
+    rankingList.innerHTML='';
+    perfectList.innerHTML='';
 
-  if (!jovens || jovens.length === 0) return;
+    let ranking = [];
 
-  // ORDEM ALFABÉTICA FORTE (ignora acento e maiúsculas/minúsculas)
-  jovens.sort((a, b) =>
-    (a.nome || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .localeCompare(
-        (b.nome || '')
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase()
-      )
-  );
+    // =====================
+    // LISTA INDIVIDUAL
+    // =====================
 
-  jovens.forEach(jovem => {
+    jovens.forEach(jovem=>{
 
-    const registros = frequencia.filter(
-      f => f.jovem_id == jovem.id
-    );
+      const registros =
+      frequencia.filter(
+        f => f.jovem_id == jovem.id
+      );
 
-    const total = registros.length;
-    const presentes = registros.filter(f => f.presente).length;
+      const total = registros.length;
 
-    const percent = total > 0
+      const presentes =
+      registros.filter(
+        f => f.presente
+      ).length;
+
+      const faltas =
+      total - presentes;
+
+      const percent =
+      total > 0
       ? Math.round((presentes / total) * 100)
       : 0;
 
-    reportList.innerHTML += `
+      ranking.push({
+        nome: jovem.nome,
+        percent,
+        presentes,
+        faltas,
+        total
+      });
+
+      reportList.innerHTML += `
+
+        <div class="report-item">
+
+          <strong>${jovem.nome}</strong>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              style="width:${percent}%"
+            ></div>
+
+          </div>
+
+          <div class="small">
+            📈 ${percent}% de presença
+          </div>
+
+          <div class="small">
+            ✅ ${presentes} presença(s)
+          </div>
+
+          <div class="small">
+            ❌ ${faltas} falta(s)
+          </div>
+
+        </div>
+
+      `;
+    });
+
+    // =====================
+    // RANKING PRESENÇA
+    // =====================
+
+    const rankingPresenca =
+    [...ranking]
+    .sort((a,b)=>
+      b.presentes - a.presentes
+    );
+
+    rankingList.innerHTML = `
+
       <div class="report-item">
-        <strong>${jovem.nome}</strong>
 
-        <div class="bar">
-          <div class="fill" style="width:${percent}%"></div>
-        </div>
+        <strong>
+          🏆 Quem Mais Compareceu
+        </strong>
 
-        <div class="small">
-          ${percent}% de presença
-        </div>
+        <br><br>
+
+        ${rankingPresenca.map((r,index)=>`
+
+          <div class="small">
+
+            ${index + 1}º —
+            ${r.nome}
+
+            • ${r.presentes} presença(s)
+
+          </div>
+
+        `).join('')}
+
       </div>
+
     `;
-  });
-} </script>
+
+    // =====================
+    // PRESENÇA PERFEITA
+    // =====================
+
+    const perfeitos =
+    ranking.filter(
+      r => r.percent === 100 && r.total > 0
+    );
+
+    if(perfeitos.length > 0){
+
+      perfectList.innerHTML = `
+
+        <div class="report-item">
+
+          <strong>
+            🔥 Presença em Todos os Cultos
+          </strong>
+
+          <br><br>
+
+          ${perfeitos.map(p=>`
+
+            <div class="small">
+              ${p.nome}
+            </div>
+
+          `).join('')}
+
+        </div>
+
+      `;
+    }
+
+    // =====================
+    // MAIS FALTAS
+    // =====================
+
+    const faltosos =
+    [...ranking]
+    .sort((a,b)=>
+      b.faltas - a.faltas
+    );
+
+    reportList.innerHTML += `
+
+      <div class="report-item">
+
+        <strong>
+          ⚠️ Quem Mais Faltou
+        </strong>
+
+        <br><br>
+
+        ${faltosos.map((f,index)=>`
+
+          <div class="small">
+
+            ${index + 1}º —
+            ${f.nome}
+
+            • ${f.faltas} falta(s)
+
+          </div>
+
+        `).join('')}
+
+      </div>
+
+    `;
+  }
+</script>
 
 <script>
 
