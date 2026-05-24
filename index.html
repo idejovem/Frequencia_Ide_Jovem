@@ -899,7 +899,7 @@
   }
 
 
-  // =========================
+   // =========================
   // RELATÓRIO
   // =========================
 
@@ -919,7 +919,8 @@
     const { data: jovens } =
     await supabaseClient
     .from('jovens')
-    .select('*');
+    .select('*')
+    .order('nome');
 
     const { data: frequencia } =
     await supabaseClient
@@ -931,6 +932,10 @@
     perfectList.innerHTML='';
 
     let ranking = [];
+
+    // =====================
+    // LISTA INDIVIDUAL
+    // =====================
 
     jovens.forEach(jovem=>{
 
@@ -978,7 +983,7 @@
           </div>
 
           <div class="small">
-            ${percent}% de presença
+            📈 ${percent}% de presença
           </div>
 
           <div class="small">
@@ -998,8 +1003,10 @@
     // RANKING PRESENÇA
     // =====================
 
-    ranking.sort((a,b)=>
-      b.percent - a.percent
+    const rankingPresenca =
+    [...ranking]
+    .sort((a,b)=>
+      b.presentes - a.presentes
     );
 
     rankingList.innerHTML = `
@@ -1007,18 +1014,19 @@
       <div class="report-item">
 
         <strong>
-          🏆 Ranking Presença
+          🏆 Quem Mais Compareceu
         </strong>
 
         <br><br>
 
-        ${ranking.map((r,index)=>`
+        ${rankingPresenca.map((r,index)=>`
 
           <div class="small">
 
-            ${index + 1}º -
+            ${index + 1}º —
             ${r.nome}
-            (${r.percent}%)
+
+            • ${r.presentes} presença(s)
 
           </div>
 
@@ -1044,7 +1052,7 @@
         <div class="report-item">
 
           <strong>
-            🔥 Presença Perfeita
+            🔥 Presença em Todos os Cultos
           </strong>
 
           <br><br>
@@ -1070,25 +1078,26 @@
     [...ranking]
     .sort((a,b)=>
       b.faltas - a.faltas
-    )
-    .slice(0,5);
+    );
 
     reportList.innerHTML += `
 
       <div class="report-item">
 
         <strong>
-          ⚠️ Mais Faltas
+          ⚠️ Quem Mais Faltou
         </strong>
 
         <br><br>
 
-        ${faltosos.map(f=>`
+        ${faltosos.map((f,index)=>`
 
           <div class="small">
 
+            ${index + 1}º —
             ${f.nome}
-            (${f.faltas} faltas)
+
+            • ${f.faltas} falta(s)
 
           </div>
 
@@ -1098,7 +1107,6 @@
 
     `;
   }
-
 
  </script>
 
