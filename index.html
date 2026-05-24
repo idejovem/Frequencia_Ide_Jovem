@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<head>
+
+<meta name="theme-color" content="#062b26" />
+
+<link rel="manifest" href="./manifest.json" />
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="black-translucent"
+>
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="iDE Jovem"
+>
+
+<link rel="apple-touch-icon" href="./icon-192.png">
 
   <meta charset="UTF-8" />
 
@@ -953,25 +972,123 @@
   // SERVICE WORKER
   // =========================
 
-  if('serviceWorker' in navigator){
+<!-- COLE ESSE TRECHO NO FINAL DO BODY, ANTES DE </body> -->
 
-    window.addEventListener('load', ()=>{
+<script>
 
-      navigator.serviceWorker
-      .register('./sw.js')
-      .then(()=>{
+  // =========================
+  // SERVICE WORKER PWA
+  // =========================
 
-        console.log('Service Worker registrado');
+  if ('serviceWorker' in navigator) {
 
-      })
-      .catch(err=>{
+    window.addEventListener('load', async () => {
 
-        console.log(err);
+      try {
 
-      });
+        const registration =
+        await navigator.serviceWorker.register('./sw.js');
+
+        console.log(
+          'Service Worker registrado:',
+          registration
+        );
+
+      } catch (error) {
+
+        console.log(
+          'Erro Service Worker:',
+          error
+        );
+      }
 
     });
   }
+
+
+  // =========================
+  // BOTÃO INSTALAR APP
+  // =========================
+
+  let deferredPrompt;
+
+  window.addEventListener(
+    'beforeinstallprompt',
+    (e) => {
+
+      e.preventDefault();
+
+      deferredPrompt = e;
+
+      showInstallButton();
+    }
+  );
+
+
+  function showInstallButton(){
+
+    // evita duplicar botão
+    if(document.getElementById('installAppBtn')){
+      return;
+    }
+
+    const btn = document.createElement('button');
+
+    btn.id = 'installAppBtn';
+
+    btn.innerHTML = '📲 Instalar Aplicativo';
+
+    btn.className = 'btn-main';
+
+    btn.style.marginTop = '15px';
+
+    btn.onclick = async () => {
+
+      if(!deferredPrompt){
+        return;
+      }
+
+      deferredPrompt.prompt();
+
+      const { outcome } =
+      await deferredPrompt.userChoice;
+
+      console.log(
+        'Resultado instalação:',
+        outcome
+      );
+
+      deferredPrompt = null;
+
+      btn.remove();
+    };
+
+    // adiciona no menu principal
+    const menuCard =
+    document.querySelector('#menuScreen .card');
+
+    menuCard.appendChild(btn);
+  }
+
+
+  // =========================
+  // APP INSTALADO
+  // =========================
+
+  window.addEventListener(
+    'appinstalled',
+    () => {
+
+      console.log('PWA instalado');
+
+      const btn =
+      document.getElementById('installAppBtn');
+
+      if(btn){
+        btn.remove();
+      }
+    }
+  );
 
 </script>
 
