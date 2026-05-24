@@ -765,10 +765,10 @@
     if(day === 0) return 'Domingo';
 
     if(day === 6 && week === 2)
-    return 'Segundo Sábado';
+    return '2º Sábado';
 
     if(day === 6 && week === 4)
-    return 'Quarto Sábado';
+    return '4º Sábado';
 
     return 'Evento Especial';
   }
@@ -908,6 +908,12 @@
     const reportList =
     document.getElementById('reportList');
 
+    const rankingList =
+    document.getElementById('rankingList');
+
+    const perfectList =
+    document.getElementById('perfectList');
+
     reportList.innerHTML='Carregando...';
 
     const { data: jovens } =
@@ -921,6 +927,10 @@
     .select('*');
 
     reportList.innerHTML='';
+    rankingList.innerHTML='';
+    perfectList.innerHTML='';
+
+    let ranking = [];
 
     jovens.forEach(jovem=>{
 
@@ -936,10 +946,21 @@
         f => f.presente
       ).length;
 
+      const faltas =
+      total - presentes;
+
       const percent =
       total > 0
       ? Math.round((presentes / total) * 100)
       : 0;
+
+      ranking.push({
+        nome: jovem.nome,
+        percent,
+        presentes,
+        faltas,
+        total
+      });
 
       reportList.innerHTML += `
 
@@ -960,10 +981,122 @@
             ${percent}% de presença
           </div>
 
+          <div class="small">
+            ✅ ${presentes} presença(s)
+          </div>
+
+          <div class="small">
+            ❌ ${faltas} falta(s)
+          </div>
+
         </div>
 
       `;
     });
+
+    // =====================
+    // RANKING PRESENÇA
+    // =====================
+
+    ranking.sort((a,b)=>
+      b.percent - a.percent
+    );
+
+    rankingList.innerHTML = `
+
+      <div class="report-item">
+
+        <strong>
+          🏆 Ranking Presença
+        </strong>
+
+        <br><br>
+
+        ${ranking.map((r,index)=>`
+
+          <div class="small">
+
+            ${index + 1}º -
+            ${r.nome}
+            (${r.percent}%)
+
+          </div>
+
+        `).join('')}
+
+      </div>
+
+    `;
+
+    // =====================
+    // PRESENÇA PERFEITA
+    // =====================
+
+    const perfeitos =
+    ranking.filter(
+      r => r.percent === 100 && r.total > 0
+    );
+
+    if(perfeitos.length > 0){
+
+      perfectList.innerHTML = `
+
+        <div class="report-item">
+
+          <strong>
+            🔥 Presença Perfeita
+          </strong>
+
+          <br><br>
+
+          ${perfeitos.map(p=>`
+
+            <div class="small">
+              ${p.nome}
+            </div>
+
+          `).join('')}
+
+        </div>
+
+      `;
+    }
+
+    // =====================
+    // MAIS FALTAS
+    // =====================
+
+    const faltosos =
+    [...ranking]
+    .sort((a,b)=>
+      b.faltas - a.faltas
+    )
+    .slice(0,5);
+
+    reportList.innerHTML += `
+
+      <div class="report-item">
+
+        <strong>
+          ⚠️ Mais Faltas
+        </strong>
+
+        <br><br>
+
+        ${faltosos.map(f=>`
+
+          <div class="small">
+
+            ${f.nome}
+            (${f.faltas} faltas)
+
+          </div>
+
+        `).join('')}
+
+      </div>
+
+    `;
   }
 
 
