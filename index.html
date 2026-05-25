@@ -971,7 +971,36 @@ async function confirmAttendance(){
 
 async function loadReports(){
 
-// FALTAS SEGUIDAS
+  const reportList =
+  document.getElementById('reportList');
+
+  const rankingList =
+  document.getElementById('rankingList');
+
+  const perfectList =
+  document.getElementById('perfectList');
+
+  const absenceSequenceList =
+document.getElementById('absenceSequenceList');
+
+  reportList.innerHTML='Carregando...';
+
+  // INPUT MÊS
+  const monthInput =
+  document.getElementById('reportMonth');
+
+  // DEFINE MÊS ATUAL AUTOMÁTICO
+  const current =
+  new Date();
+
+  if(!monthInput.value){
+
+    monthInput.value =
+    `${current.getFullYear()}-${
+      String(current.getMonth()+1)
+      .padStart(2,'0') 
+    
+   // FALTAS SEGUIDAS
 let faltasSeguidasHTML = '';
 
 for(const jovem of jovens){
@@ -1036,38 +1065,8 @@ if(faltasSeguidasHTML){
     </div>
 
   `;
-}
 
-  const reportList =
-  document.getElementById('reportList');
-
-  const rankingList =
-  document.getElementById('rankingList');
-
-  const perfectList =
-  document.getElementById('perfectList');
-
-  const absenceSequenceList =
-document.getElementById('absenceSequenceList');
-
-  reportList.innerHTML='Carregando...';
-
-  // INPUT MÊS
-  const monthInput =
-  document.getElementById('reportMonth');
-
-  // DEFINE MÊS ATUAL AUTOMÁTICO
-  const current =
-  new Date();
-
-  if(!monthInput.value){
-
-    monthInput.value =
-    `${current.getFullYear()}-${
-      String(current.getMonth()+1)
-      .padStart(2,'0')
-    }`;
-  }
+}`
 
   const selectedMonth =
   monthInput.value;
