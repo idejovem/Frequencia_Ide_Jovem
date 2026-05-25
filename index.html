@@ -965,7 +965,7 @@ async function confirmAttendance(){
 
   loadAttendance();
 }
- // =========================
+// =========================
 // RELATÓRIO
 // =========================
 
@@ -981,7 +981,7 @@ async function loadReports(){
   document.getElementById('perfectList');
 
   const absenceSequenceList =
-document.getElementById('absenceSequenceList');
+  document.getElementById('absenceSequenceList');
 
   reportList.innerHTML='Carregando...';
 
@@ -989,84 +989,17 @@ document.getElementById('absenceSequenceList');
   const monthInput =
   document.getElementById('reportMonth');
 
-  // DEFINE MÊS ATUAL AUTOMÁTICO
-  const current =
-  new Date();
+  // DEFINE MÊS ATUAL
+  const current = new Date();
 
   if(!monthInput.value){
 
     monthInput.value =
     `${current.getFullYear()}-${
       String(current.getMonth()+1)
-      .padStart(2,'0') 
-    
-   // FALTAS SEGUIDAS
-let faltasSeguidasHTML = '';
-
-for(const jovem of jovens){
-
-  const registros =
-  frequencia
-  .filter(f => f.jovem_id == jovem.id)
-  .sort((a,b)=>
-    new Date(a.data_evento) -
-    new Date(b.data_evento)
-  );
-
-  let sequenciaAtual = 0;
-  let maiorSequencia = 0;
-
-  registros.forEach(r=>{
-
-    if(r.presente === false){
-
-      sequenciaAtual++;
-
-      if(sequenciaAtual > maiorSequencia){
-        maiorSequencia = sequenciaAtual;
-      }
-
-    }else{
-
-      sequenciaAtual = 0;
-    }
-  });
-
-  if(maiorSequencia >= 3){
-
-    faltasSeguidasHTML += `
-
-      <div class="small">
-
-        ⚠️ ${jovem.nome}
-
-        • ${maiorSequencia} faltas seguidas
-
-      </div>
-
-    `;
+      .padStart(2,'0')
+    }`;
   }
-}
-
-if(faltasSeguidasHTML){
-
-  absenceSequenceList.innerHTML = `
-
-    <div class="report-item">
-
-      <strong>
-        🚨 Faltas Consecutivas
-      </strong>
-
-      <br><br>
-
-      ${faltasSeguidasHTML}
-
-    </div>
-
-  `;
-
-}`
 
   const selectedMonth =
   monthInput.value;
@@ -1077,13 +1010,14 @@ if(faltasSeguidasHTML){
   const endDate =
   selectedMonth + '-31T23:59:59';
 
+  // JOVENS
   const { data: jovens } =
   await supabaseClient
   .from('jovens')
   .select('*')
   .order('nome');
 
-  // FILTRA SOMENTE O MÊS ESCOLHIDO
+  // FREQUÊNCIA
   const { data: frequencia } =
   await supabaseClient
   .from('frequencia')
@@ -1105,7 +1039,8 @@ if(faltasSeguidasHTML){
       f => f.jovem_id == jovem.id
     );
 
-    const total = registros.length;
+    const total =
+    registros.length;
 
     const presentes =
     registros.filter(
@@ -1160,7 +1095,7 @@ if(faltasSeguidasHTML){
     `;
   });
 
-  // RANKING
+  // RANKING PRESENÇA
   const rankingPresenca =
   [...ranking]
   .sort((a,b)=>
@@ -1225,6 +1160,73 @@ if(faltasSeguidasHTML){
     `;
   }
 
+  // FALTAS SEGUIDAS
+  let faltasSeguidasHTML = '';
+
+  for(const jovem of jovens){
+
+    const registros =
+    frequencia
+    .filter(f => f.jovem_id == jovem.id)
+    .sort((a,b)=>
+      new Date(a.data_evento) -
+      new Date(b.data_evento)
+    );
+
+    let sequenciaAtual = 0;
+    let maiorSequencia = 0;
+
+    registros.forEach(r=>{
+
+      if(r.presente === false){
+
+        sequenciaAtual++;
+
+        if(sequenciaAtual > maiorSequencia){
+          maiorSequencia = sequenciaAtual;
+        }
+
+      }else{
+
+        sequenciaAtual = 0;
+      }
+    });
+
+    if(maiorSequencia >= 3){
+
+      faltasSeguidasHTML += `
+
+        <div class="small">
+
+          ⚠️ ${jovem.nome}
+
+          • ${maiorSequencia} faltas seguidas
+
+        </div>
+
+      `;
+    }
+  }
+
+  if(faltasSeguidasHTML){
+
+    absenceSequenceList.innerHTML = `
+
+      <div class="report-item">
+
+        <strong>
+          🚨 Faltas Consecutivas
+        </strong>
+
+        <br><br>
+
+        ${faltasSeguidasHTML}
+
+      </div>
+
+    `;
+  }
+
   // MAIS FALTAS
   const faltosos =
   [...ranking]
@@ -1232,7 +1234,7 @@ if(faltasSeguidasHTML){
     b.faltas - a.faltas
   );
 
-  reportList.innerHTML += `
+    reportList.innerHTML += `
 
     <div class="report-item">
 
@@ -1258,6 +1260,7 @@ if(faltasSeguidasHTML){
     </div>
 
   `;
+  
 }
 
 </script>
