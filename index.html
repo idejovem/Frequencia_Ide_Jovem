@@ -925,7 +925,7 @@ async function confirmAttendance(){
 
   for(const check of checks){
 
-    // VERIFICA SE JÁ EXISTE
+    // VERIFICAR SE JÁ EXISTE REGISTRO
     const { data: existente } =
     await supabaseClient
     .from('frequencia')
@@ -934,7 +934,7 @@ async function confirmAttendance(){
     .gte('data_evento', selectedDate + 'T00:00:00')
     .lte('data_evento', selectedDate + 'T23:59:59');
 
-    // SE NÃO EXISTE
+    // SE NÃO EXISTE, SALVA
     if(existente.length === 0){
 
       const presente =
