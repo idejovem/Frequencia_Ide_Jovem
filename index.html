@@ -573,33 +573,19 @@ MOBILE MELHORADO
 
     <div class="tabs">
 
-      <button
-        class="tab-btn tab-active"
-        onclick="openReportTab('tab1', this)"
-      >
-        Frequência
-      </button>
+<button
+  class="tab-btn tab-active"
+  onclick="openReportTab('tab1', this)"
+>
+  Frequência
+</button>
 
-      <button
-        class="tab-btn"
-        onclick="openReportTab('tab2', this)"
-      >
-        Ranking
-      </button>
-
-      <button
-        class="tab-btn"
-        onclick="openReportTab('tab3', this)"
-      >
-        Presença Total
-      </button>
-
-      <button
-        class="tab-btn"
-        onclick="openReportTab('tab4', this)"
-      >
-        Faltas
-      </button>
+<button
+  class="tab-btn"
+  onclick="openReportTab('tab2', this)"
+>
+  Quem Mais Faltou
+</button>
 
     </div>
 
@@ -611,25 +597,11 @@ MOBILE MELHORADO
     </div>
 
     <div
-      id="tab2"
-      class="report-tab"
-    >
-      <div id="rankingList"></div>
-    </div>
-
-    <div
-      id="tab3"
-      class="report-tab"
-    >
-      <div id="perfectList"></div>
-    </div>
-
-    <div
-      id="tab4"
-      class="report-tab"
-    >
-      <div id="absenceSequenceList"></div>
-    </div>
+  id="tab2"
+  class="report-tab"
+>
+  <div id="absenceSequenceList"></div>
+</div>
 
   </div>
 
@@ -1194,12 +1166,7 @@ async function loadReports(){
   const reportList =
   document.getElementById('reportList');
 
-  const rankingList =
-  document.getElementById('rankingList');
-
-  const perfectList =
-  document.getElementById('perfectList');
-
+  
   const absenceSequenceList =
   document.getElementById('absenceSequenceList');
 
@@ -1246,8 +1213,6 @@ selectedMonth + '-31T23:59:59.999';
   .lte('data_evento', endDate);
 
   reportList.innerHTML='';
-  rankingList.innerHTML='';
-  perfectList.innerHTML='';
   absenceSequenceList.innerHTML+='';
 
   let ranking = [];
@@ -1321,72 +1286,8 @@ registros.filter(
     `;
   });
 
-  // RANKING PRESENÇA
-  const rankingPresenca =
-  [...ranking]
-  .sort((a,b)=>
-    b.presentes - a.presentes
-  );
-
-  rankingList.innerHTML = `
-
-    <div class="report-item">
-
-      <strong>
-        🏆 Quem Mais Compareceu
-      </strong>
-
-      <br><br>
-
-      ${rankingPresenca.map((r,index)=>`
-
-        <div class="small">
-
-          ${index + 1}º —
-          ${r.nome}
-
-          • ${r.presentes} presença(s)
-
-        </div>
-
-      `).join('')}
-
-    </div>
-
-  `;
-
-  // PRESENÇA PERFEITA
-  const perfeitos =
-  ranking.filter(
-    r => r.percent === 100 && r.total > 0
-  );
-
-  if(perfeitos.length > 0){
-
-    perfectList.innerHTML = `
-
-      <div class="report-item">
-
-        <strong>
-          🔥 Presença em Todos os Cultos
-        </strong>
-
-        <br><br>
-
-        ${perfeitos.map(p=>`
-
-          <div class="small">
-            ${p.nome}
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-  }
-
-  // FALTAS SEGUIDAS
+  
+   // FALTAS SEGUIDAS
   let faltasSeguidasHTML = '';
 
   for(const jovem of jovens){
@@ -1460,35 +1361,33 @@ registros.filter(
     b.faltas - a.faltas
   );
 
-    reportList.innerHTML += `
+   absenceSequenceList.innerHTML += `
 
-    <div class="report-item">
+<div class="report-item">
 
-      <strong>
-        ⚠️ Quem Mais Faltou
-      </strong>
+<strong>
+⚠️ Quem Mais Faltou
+</strong>
 
-      <br><br>
+<br><br>
 
-      ${faltosos.map((f,index)=>`
+${faltosos.map((f,index)=>`
 
-        <div class="small">
+<div class="small">
 
-          ${index + 1}º —
-          ${f.nome}
+${index + 1}º —
+${f.nome}
 
-          • ${f.faltas} falta(s)
+• ${f.faltas} falta(s)
 
-        </div>
+</div>
 
-      `).join('')}
+`).join('')}
 
-    </div>
-
-  `;
-  
+</div>
+`;
 }
-
+  
 </script>
 
 <script>
