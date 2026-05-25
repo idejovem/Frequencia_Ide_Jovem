@@ -921,7 +921,7 @@ async function confirmAttendance(){
   document.getElementById('attendanceDate').value
   || new Date().toISOString().split('T')[0];
 
-  let totalPresencas = 0;
+  let total = 0;
 
   for(const check of checks){
 
@@ -934,31 +934,33 @@ async function confirmAttendance(){
     .gte('data_evento', selectedDate + 'T00:00:00')
     .lte('data_evento', selectedDate + 'T23:59:59');
 
-    // SE NÃO EXISTE, SALVA
-    if(existente.length === 0){
-
-      const presente =
-      check.checked;
-
-      await supabaseClient
-      .from('frequencia')
-      .insert([
-        {
-          jovem_id: check.value,
-          presente: presente,
-          evento: event,
-          data_evento: selectedDate + 'T12:00:00'
-        }
-      ]);
-
-      if(presente){
-        totalPresencas++;
-      }
+    // SE JÁ EXISTIR, IGNORA
+    if(existente.length > 0){
+      continue;
     }
+
+    // PRESENÇA
+    const presente = check.checked;
+
+    await supabaseClient
+    .from('frequencia')
+    .insert([
+      {
+        jovem_id: check.value,
+        presente: presente,
+        evento: event,
+        data_evento:
+        selectedDate + 'T12:00:00'
+      }
+    ]);
+
+    total++;
   }
 
   alert(
-    `Chamada salva.\n${totalPresencas} presença(s) registrada(s).`
+    total > 0
+    ? 'Chamada salva com sucesso'
+    : 'Nenhuma alteração'
   );
 
   loadAttendance();
