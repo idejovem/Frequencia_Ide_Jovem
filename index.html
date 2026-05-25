@@ -273,6 +273,111 @@
       text-align:center;
     }
 
+.top-bar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.back-btn{
+  width:auto;
+  padding:10px 16px;
+  border-radius:14px;
+  background:#ffffff12;
+  color:white;
+  border:1px solid rgba(255,255,255,.08);
+  margin:0;
+}
+
+.top-title{
+  font-size:20px;
+  font-weight:700;
+}
+
+/* =========================
+ABAS RELATÓRIO
+========================= */
+
+.tabs{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+  margin:20px 0;
+  padding-bottom:5px;
+}
+
+.tab-btn{
+  min-width:max-content;
+  padding:12px 18px;
+  border-radius:14px;
+  background:#ffffff10;
+  color:white;
+  border:none;
+  font-size:14px;
+}
+
+.tab-active{
+  background:linear-gradient(135deg,#ff6600,#ff9d00);
+}
+
+.report-tab{
+  display:none;
+}
+
+.report-tab.active-tab{
+  display:block;
+}
+
+/* =========================
+SCROLL MELHOR
+========================= */
+
+#reportList,
+#rankingList,
+#perfectList,
+#absenceSequenceList{
+  max-height:65vh;
+  overflow:auto;
+  padding-right:5px;
+}
+
+/* =========================
+BOTÃO FIXO TOPO
+========================= */
+
+.screen{
+  padding-top:10px;
+}
+
+    /* =========================
+MOBILE MELHORADO
+========================= */
+
+.card{
+  overflow:hidden;
+}
+
+.report-tab{
+  max-height:70vh;
+  overflow:auto;
+  padding-right:5px;
+}
+
+.tabs::-webkit-scrollbar{
+  height:4px;
+}
+
+.tabs::-webkit-scrollbar-thumb{
+  background:#ffffff30;
+  border-radius:20px;
+}
+
+.back-btn{
+  position:sticky;
+  top:0;
+  z-index:99;
+}
   </style>
 
 </head>
@@ -414,113 +519,192 @@
 
   </section>
 
-  <!-- JOVENS -->
-  <section id="jovensScreen" class="screen">
+ <!-- JOVENS -->
+<section id="jovensScreen" class="screen">
 
-    <div class="card">
+  <div class="top-bar">
 
-      <div class="title">
-        Jovens Cadastrados
-      </div>
+    <button
+      class="back-btn"
+      onclick="openScreen('menuScreen')"
+    >
+      ← Voltar
+    </button>
 
-      <div id="youngList"></div>
-
-      <button onclick="openScreen('menuScreen')">
-        Voltar
-      </button>
-
+    <div class="top-title">
+      Jovens
     </div>
 
-  </section>
+  </div>
+
+  <div class="card">
+
+    <div id="youngList"></div>
+
+  </div>
+
+</section>
 
 <!-- RELATÓRIO -->
 <section id="relatorioScreen" class="screen">
 
-  <div class="card">
+  <div class="top-bar">
 
-    <div class="title">
-      Relatório Frequência
+    <button
+      class="back-btn"
+      onclick="openScreen('menuScreen')"
+    >
+      ← Voltar
+    </button>
+
+    <div class="top-title">
+      Relatórios
     </div>
 
+  </div>
+
+  <div class="card">
+
     <input
-  type="month"
-  id="reportMonth"
-  onchange="loadReports()"
-/>
+      type="month"
+      id="reportMonth"
+      onchange="loadReports()"
+    />
 
-    <div id="reportList"></div>
+    <div class="tabs">
 
-    <div id="rankingList"></div>
+      <button
+        class="tab-btn tab-active"
+        onclick="openReportTab('tab1', this)"
+      >
+        Frequência
+      </button>
 
-    <div id="perfectList"></div>
+      <button
+        class="tab-btn"
+        onclick="openReportTab('tab2', this)"
+      >
+        Ranking
+      </button>
 
-    <div id="absenceSequenceList"></div>
+      <button
+        class="tab-btn"
+        onclick="openReportTab('tab3', this)"
+      >
+        Presença Total
+      </button>
 
-    <button onclick="openScreen('menuScreen')">
-      Voltar
+      <button
+        class="tab-btn"
+        onclick="openReportTab('tab4', this)"
+      >
+        Faltas
+      </button>
+
+    </div>
+
+    <div
+      id="tab1"
+      class="report-tab active-tab"
+    >
+      <div id="reportList"></div>
+    </div>
+
+    <div
+      id="tab2"
+      class="report-tab"
+    >
+      <div id="rankingList"></div>
+    </div>
+
+    <div
+      id="tab3"
+      class="report-tab"
+    >
+      <div id="perfectList"></div>
+    </div>
+
+    <div
+      id="tab4"
+      class="report-tab"
+    >
+      <div id="absenceSequenceList"></div>
+    </div>
+
+  </div>
+
+</section>
+  
+ <!-- CHAMADA -->
+<section id="chamadaScreen" class="screen">
+
+  <div class="top-bar">
+
+    <button
+      class="back-btn"
+      onclick="openScreen('menuScreen')"
+    >
+      ← Voltar
+    </button>
+
+    <div class="top-title">
+      Chamada
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div
+      class="top-date"
+      id="eventDate"
+    ></div>
+
+    <input
+      type="date"
+      id="attendanceDate"
+    />
+
+    <button
+      class="btn-main"
+      onclick="loadAttendance()"
+    >
+      Carregar Data
+    </button>
+
+    <div id="attendanceList"></div>
+
+    <button
+      class="btn-main"
+      onclick="confirmAttendance()"
+    >
+      Confirmar Chamada
     </button>
 
   </div>
 
 </section>
 
-  <!-- CHAMADA -->
-  <section id="chamadaScreen" class="screen">
+  <section id="aniversariosScreen" class="screen">
 
-    <div class="card">
+  <div class="top-bar">
 
-      <div class="title">
-        Chamada
-      </div>
+    <button
+      class="back-btn"
+      onclick="openScreen('menuScreen')"
+    >
+      ← Voltar
+    </button>
 
-      <div
-        class="top-date"
-        id="eventDate"
-      ></div>
-
-      <input
-  type="date"
-  id="attendanceDate"
-/>
-      <button
-  class="btn-main"
-  onclick="loadAttendance()"
->
-  Carregar Data
-</button>
-
-      <div id="attendanceList"></div>
-
-      <button
-        class="btn-main"
-        onclick="confirmAttendance()"
-      >
-        Confirmar Chamada
-      </button>
-
-      <button onclick="openScreen('menuScreen')">
-        Voltar
-      </button>
-
+    <div class="top-title">
+      Aniversariantes
     </div>
 
-  </section>
-
-  <!-- ANIVERSARIANTES -->
-
-  <section id="aniversariosScreen" class="screen">
+  </div>
 
   <div class="card">
 
-    <div class="title">
-      🎂 Aniversariantes do Mês
-    </div>
-
     <div id="birthList"></div>
-
-    <button onclick="openScreen('menuScreen')">
-      Voltar
-    </button>
 
   </div>
 
@@ -880,25 +1064,36 @@ async function loadAttendance(){
 
   jovens.forEach(jovem=>{
 
-    const jaMarcado =
-    presencasHoje.some(
-      p => p.jovem_id == jovem.id && p.presente
-    );
+   const registroExistente =
+presencasHoje.find(
+  p => p.jovem_id == jovem.id
+);
 
+const jaMarcado =
+registroExistente !== undefined;
     list.innerHTML += `
 
       <div class="check-item ${jaMarcado ? 'disabled-check' : ''}">
 
         <span>
           ${jovem.nome}
-          ${jaMarcado ? '✅' : ''}
+          ${
+  registroExistente
+  ? (
+      registroExistente.presente
+      ? '✅'
+      : '❌'
+    )
+  : ''
+}
         </span>
 
         <input
           type="checkbox"
           class="check-presence"
           value="${jovem.id}"
-          ${jaMarcado ? 'checked disabled' : ''}
+          ${registroExistente?.presente ? 'checked' : ''}
+${jaMarcado ? 'disabled' : ''}
         >
 
       </div>
@@ -965,9 +1160,34 @@ async function confirmAttendance(){
 
   loadAttendance();
 }
+ // =========================
+// ABAS RELATÓRIO
 // =========================
-// RELATÓRIO
-// =========================
+
+function openReportTab(tabId, btn){
+
+  document
+  .querySelectorAll('.report-tab')
+  .forEach(tab=>{
+
+    tab.classList.remove('active-tab');
+
+  });
+
+  document
+  .getElementById(tabId)
+  .classList.add('active-tab');
+
+  document
+  .querySelectorAll('.tab-btn')
+  .forEach(button=>{
+
+    button.classList.remove('tab-active');
+
+  });
+
+  btn.classList.add('tab-active');
+}
 
 async function loadReports(){
 
@@ -1008,7 +1228,7 @@ async function loadReports(){
   selectedMonth + '-01T00:00:00';
 
   const endDate =
-  selectedMonth + '-31T23:59:59';
+selectedMonth + '-31T23:59:59.999';
 
   // JOVENS
   const { data: jovens } =
@@ -1028,11 +1248,15 @@ async function loadReports(){
   reportList.innerHTML='';
   rankingList.innerHTML='';
   perfectList.innerHTML='';
-  absenceSequenceList.innerHTML='';
+  absenceSequenceList.innerHTML+='';
 
   let ranking = [];
 
-  jovens.forEach(jovem=>{
+ jovens
+.sort((a,b)=>
+  a.nome.localeCompare(b.nome)
+)
+.forEach(jovem=>{
 
     const registros =
     frequencia.filter(
@@ -1048,7 +1272,9 @@ async function loadReports(){
     ).length;
 
     const faltas =
-    total - presentes;
+registros.filter(
+  f => f.presente === false
+).length;
 
     const percent =
     total > 0
