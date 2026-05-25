@@ -454,6 +454,8 @@
 
     <div id="perfectList"></div>
 
+    <div id="absenceSequenceList"></div>
+
     <button onclick="openScreen('menuScreen')">
       Voltar
     </button>
@@ -904,7 +906,7 @@ async function loadAttendance(){
     `;
   });
 }  
- // =========================
+// =========================
 // CONFIRMAR CHAMADA
 // =========================
 
@@ -915,57 +917,124 @@ async function confirmAttendance(){
 
   const event = getEventType();
 
-  // DATA ESCOLHIDA
   const selectedDate =
   document.getElementById('attendanceDate').value
   || new Date().toISOString().split('T')[0];
 
-  let total = 0;
+  let totalPresencas = 0;
 
   for(const check of checks){
 
-    if(check.checked && !check.disabled){
+    // VERIFICA SE JÁ EXISTE
+    const { data: existente } =
+    await supabaseClient
+    .from('frequencia')
+    .select('*')
+    .eq('jovem_id', check.value)
+    .gte('data_evento', selectedDate + 'T00:00:00')
+    .lte('data_evento', selectedDate + 'T23:59:59');
 
-      const { data: existente } =
+    // SE NÃO EXISTE
+    if(existente.length === 0){
+
+      const presente =
+      check.checked;
+
       await supabaseClient
       .from('frequencia')
-      .select('*')
-      .eq('jovem_id', check.value)
-      .gte('data_evento', selectedDate + 'T00:00:00')
-      .lte('data_evento', selectedDate + 'T23:59:59');
+      .insert([
+        {
+          jovem_id: check.value,
+          presente: presente,
+          evento: event,
+          data_evento: selectedDate + 'T12:00:00'
+        }
+      ]);
 
-      if(existente.length === 0){
-
-        await supabaseClient
-        .from('frequencia')
-        .insert([
-          {
-            jovem_id: check.value,
-            presente: true,
-            evento: event,
-            data_evento: selectedDate + 'T12:00:00'
-          }
-        ]);
-
-        total++;
+      if(presente){
+        totalPresencas++;
       }
     }
   }
 
   alert(
-    total > 0
-    ? `${total} presença(s) salva(s)`
-    : 'Nenhuma nova presença'
+    `Chamada salva.\n${totalPresencas} presença(s) registrada(s).`
   );
 
   loadAttendance();
 }
-  
  // =========================
 // RELATÓRIO
 // =========================
 
 async function loadReports(){
+
+// FALTAS SEGUIDAS
+let faltasSeguidasHTML = '';
+
+for(const jovem of jovens){
+
+  const registros =
+  frequencia
+  .filter(f => f.jovem_id == jovem.id)
+  .sort((a,b)=>
+    new Date(a.data_evento) -
+    new Date(b.data_evento)
+  );
+
+  let sequenciaAtual = 0;
+  let maiorSequencia = 0;
+
+  registros.forEach(r=>{
+
+    if(r.presente === false){
+
+      sequenciaAtual++;
+
+      if(sequenciaAtual > maiorSequencia){
+        maiorSequencia = sequenciaAtual;
+      }
+
+    }else{
+
+      sequenciaAtual = 0;
+    }
+  });
+
+  if(maiorSequencia >= 3){
+
+    faltasSeguidasHTML += `
+
+      <div class="small">
+
+        ⚠️ ${jovem.nome}
+
+        • ${maiorSequencia} faltas seguidas
+
+      </div>
+
+    `;
+  }
+}
+
+if(faltasSeguidasHTML){
+
+  absenceSequenceList.innerHTML = `
+
+    <div class="report-item">
+
+      <strong>
+        🚨 Faltas Consecutivas
+      </strong>
+
+      <br><br>
+
+      ${faltasSeguidasHTML}
+
+    </div>
+
+  `;
+}
 
   const reportList =
   document.getElementById('reportList');
@@ -975,6 +1044,9 @@ async function loadReports(){
 
   const perfectList =
   document.getElementById('perfectList');
+
+  const absenceSequenceList =
+document.getElementById('absenceSequenceList');
 
   reportList.innerHTML='Carregando...';
 
@@ -1021,6 +1093,7 @@ async function loadReports(){
   reportList.innerHTML='';
   rankingList.innerHTML='';
   perfectList.innerHTML='';
+  absenceSequenceList.innerHTML='';
 
   let ranking = [];
 
