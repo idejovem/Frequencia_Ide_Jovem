@@ -918,7 +918,13 @@ MOBILE MELHORADO
       list.innerHTML='<p>Nenhum jovem cadastrado.</p>';
       return;
     }
-
+data.sort((a,b)=>
+  a.nome.localeCompare(
+    b.nome,
+    'pt-BR',
+    { sensitivity:'base' }
+  )
+);
     data.forEach(jovem=>{
 
       list.innerHTML += `
@@ -988,10 +994,18 @@ MOBILE MELHORADO
 async function loadAttendance(){
 
   const { data: jovens, error } =
-  await supabaseClient
-  .from('jovens')
-  .select('*')
-  .order('nome');
+await supabaseClient
+.from('jovens')
+.select('*')
+.order('nome', { ascending: true });
+
+jovens.sort((a,b)=>
+  a.nome.localeCompare(
+    b.nome,
+    'pt-BR',
+    { sensitivity:'base' }
+  )
+);
 
   const dateInput =
   document.getElementById('attendanceDate');
@@ -1213,13 +1227,17 @@ selectedMonth + '-31T23:59:59.999';
   .lte('data_evento', endDate);
 
   reportList.innerHTML='';
-  absenceSequenceList.innerHTML+='';
+  absenceSequenceList.innerHTML='';
 
   let ranking = [];
 
- jovens
+jovens
 .sort((a,b)=>
-  a.nome.localeCompare(b.nome)
+  a.nome.localeCompare(
+    b.nome,
+    'pt-BR',
+    { sensitivity:'base' }
+  )
 )
 .forEach(jovem=>{
 
@@ -1547,7 +1565,13 @@ async function loadBirthdays(){
   });
 
   // ORDENAR PELO DIA
-  aniversariantes.sort((a,b)=>{
+ aniversariantes.sort((a,b)=>
+  a.nome.localeCompare(
+    b.nome,
+    'pt-BR',
+    { sensitivity:'base' }
+  )
+);
 
     const diaA =
     parseInt(a.nascimento.split('-')[2]);
